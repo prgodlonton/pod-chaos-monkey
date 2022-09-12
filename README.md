@@ -1,6 +1,6 @@
 # README
 
-This CLI is a skeleton implementation of a chaos monkey program. It randomly selects a pod from a namespace filter by 
+This CLI is a skeleton implementation of a chaos monkey program. It randomly selects a pod from a namespace filtered by 
 the supplied pod selector and deletes it. The kubernetes API server should run another pod in response. This testing
 exposes any services that may have resiliency or performance issues when pods are evicted from nodes or unexpectedly
 crash.
