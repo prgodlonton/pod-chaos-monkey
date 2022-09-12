@@ -1,10 +1,10 @@
 //go:build !integration
 
-package monkeys_test
+package commands_test
 
 import (
 	"context"
-	"cp2/cli/internal/commands/monkeys"
+	"cp2/cli/internal/commands"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -47,7 +47,7 @@ type MockDeleterLister struct {
 }
 
 func TestPodDeleterReturnsImmediatelyWhenPassedCanceledContext(t *testing.T) {
-	deleter, err := monkeys.NewSaboteur(&MockDeleterLister{}, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(&MockDeleterLister{}, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestPodDeleterReturnsImmediatelyWhenPassedCanceledContext(t *testing.T) {
 	ctx, cfn := context.WithCancel(context.Background())
 	cfn()
 
-	assert.Nil(t, deleter.Havoc(ctx, ""))
+	assert.Nil(t, deleter.Disrupt(ctx, ""))
 }
 
 func TestPodDeleterCallsListerWithSelector(t *testing.T) {
@@ -76,12 +76,12 @@ func TestPodDeleterCallsListerWithSelector(t *testing.T) {
 			},
 		},
 	}
-	deleter, err := monkeys.NewSaboteur(dl, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(dl, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
 
-	as.Nil(deleter.Havoc(ctx, expectedSelector))
+	as.Nil(deleter.Disrupt(ctx, expectedSelector))
 	as.True(dl.MockLister.WasCalled)
 }
 
@@ -93,13 +93,13 @@ func TestPodDeleterReturnsErrorWhenListerReturnsError(t *testing.T) {
 			},
 		},
 	}
-	deleter, err := monkeys.NewSaboteur(dl, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(dl, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
 
 	as := assert.New(t)
-	as.NotNil(deleter.Havoc(context.Background(), ""))
+	as.NotNil(deleter.Disrupt(context.Background(), ""))
 	as.True(dl.MockLister.WasCalled)
 }
 
@@ -121,7 +121,7 @@ func TestPodDeleterDoesNothingWhenListerReturnsEmptyList(t *testing.T) {
 			},
 		},
 	}
-	deleter, err := monkeys.NewSaboteur(dl, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(dl, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestPodDeleterDoesNothingWhenListerReturnsEmptyList(t *testing.T) {
 	defer cfn()
 
 	go func() {
-		assert.Nil(t, deleter.Havoc(ctx, ""))
+		assert.Nil(t, deleter.Disrupt(ctx, ""))
 	}()
 
 	for i := 0; i < 10; {
@@ -157,12 +157,12 @@ func TestPodDeleterReturnsErrorWhenDeleterReturnsError(t *testing.T) {
 			},
 		},
 	}
-	deleter, err := monkeys.NewSaboteur(dl, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(dl, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
 
-	as.NotNil(deleter.Havoc(context.Background(), ""))
+	as.NotNil(deleter.Disrupt(context.Background(), ""))
 	as.True(dl.MockDeleter.WasCalled)
 }
 
@@ -193,11 +193,11 @@ func TestPodDeleterSelectsPodForDeletionFromList(t *testing.T) {
 			},
 		},
 	}
-	deleter, err := monkeys.NewSaboteur(dl, time.Duration(0))
+	deleter, err := commands.NewPodDisruptor(dl, time.Duration(0))
 	if err != nil {
 		t.Fatalf("cannot create pod deleter: %v", err)
 	}
 
-	as.Nil(deleter.Havoc(ctx, ""))
+	as.Nil(deleter.Disrupt(ctx, ""))
 	as.True(dl.MockDeleter.WasCalled)
 }

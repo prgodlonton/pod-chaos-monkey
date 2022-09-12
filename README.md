@@ -5,6 +5,10 @@ the supplied pod selector and deletes it. The kubernetes API server should run a
 exposes any services that may have resiliency or performance issues when pods are evicted from nodes or unexpectedly
 crash.
 
+## Structure
+
+All source code can be found under the `cli` folder
+
 ## Setup
 
 Install minikube locally. Start it with `minikube start` and then run `eval $(minikube docker-env)` to set up your local 
