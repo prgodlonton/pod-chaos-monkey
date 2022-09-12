@@ -58,7 +58,7 @@ func command(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	deleter, err := commands.NewPodDisruptor(pods.NewClient(cs, args[0]), interval)
+	disruptor, err := commands.NewPodDisruptor(pods.NewClient(cs, args[0]), interval)
 	if err != nil {
 		return fmt.Errorf("cannot create tester: %w", err)
 	}
@@ -71,7 +71,7 @@ func command(cmd *cobra.Command, args []string) error {
 
 	errs := make(chan error)
 	go func() {
-		if err := deleter.Disrupt(ctx, selector); err != nil {
+		if err := disruptor.Disrupt(ctx, selector); err != nil {
 			errs <- fmt.Errorf("cannot start tester: %w", err)
 		}
 		close(errs)
