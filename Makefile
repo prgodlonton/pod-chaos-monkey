@@ -23,11 +23,11 @@ build.local: $(shell find ./cli/ -type f)
 	@golangci-lint run ./...
 	@go build -o pod-chaos-monkey ./cli/cmd/main.go
 
+start: build
+	@kubectl apply -f ./manifests/run.yaml
+
 start.local: build.local
 	./pod-chaos-monkey workloads --local --selector app=nginx,env=dev
-
-start:
-	@kubectl apply -f ./manifests/run.yaml
 
 test:
 	@go test -v --cover ./...
