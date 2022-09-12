@@ -1,0 +1,6 @@
+# folders
+.git/
+.idea/
+
+# binaries
+/pod-chaos-monkey
