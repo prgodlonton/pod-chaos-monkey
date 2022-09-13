@@ -6,6 +6,7 @@
 # make clean                     # removes the binary
 # make start                     # starts the pod chaos monkey running in your Kubernetes cluster
 # make start.local               # starts the pod chaos monkey running locally
+# make setup                     # applies ./manifests/setup.yaml to the cluster
 # make test                      # runs unit tests
 # make test.int                  # runs integration tests
 
@@ -24,11 +25,14 @@ build.local: $(shell find ./cli/ -type f)
 	@golangci-lint run ./...
 	@go build -o pod-chaos-monkey ./cli/cmd/main.go
 
-start: build
+start: build setup
 	@kubectl apply -f ./manifests/run.yaml
 
-start.local: build.local
-	./pod-chaos-monkey workloads --local --selector app=nginx,env=dev
+start.local: build.local setup
+	@./pod-chaos-monkey workloads --local --selector app=nginx,env=dev
+
+setup:
+	@kubectl apply -f ./manifests/setup.yaml
 
 test:
 	@go test -v --cover ./...

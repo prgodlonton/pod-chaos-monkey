@@ -54,7 +54,7 @@ Alternatively, use `make build.local` to build the binary locally.
 
 ### Locally
 
-The program can be run locally with `./pod-chaos-monkey workloads --local`.
+The program can be run locally with `./pod-chaos-monkey workloads --local` or with `make start.local`.
 The `--local` argument is required for running locally and instructs the CLI to read cluster data from `~/.kube` directory.
 This setup is useful for debugging.
 The arguments `--selector` and `--interval` allow you to specify a custom pod selector and interval between pod deletions.
@@ -65,7 +65,7 @@ labels `app=nginx,env-dev` every 2 seconds from the workloads namespace.
 
 ### In Cluster
 
-Run `kubectl apply -f ./manifests/run.yaml` to run the program within the cluster. 
+Run `kubectl apply -f ./manifests/run.yaml` to run the program within the cluster or with `make start`
 It will be deployed to the workloads namespace and will select only those pods created via `./manifests/setup.yaml` as 
 candidates for deletion.
 The `./manifests/run.yaml` will also create the necessary cluster role and bind this cluster role onto the default 
