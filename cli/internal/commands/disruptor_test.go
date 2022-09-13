@@ -5,6 +5,7 @@ package commands_test
 import (
 	"context"
 	"cp2/cli/internal/commands"
+	"cp2/cli/internal/kubernetes/pods"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -30,6 +31,8 @@ func (md *MockDeleter) Delete(ctx context.Context, name string) error {
 	return nil
 }
 
+var _ pods.Deleter = &MockDeleter{}
+
 type MockLister struct {
 	Callback  func(ctx context.Context, selector string) ([]string, error)
 	WasCalled bool
@@ -45,10 +48,14 @@ func (ml *MockLister) List(ctx context.Context, selector string) ([]string, erro
 	return []string{}, nil
 }
 
+var _ pods.Lister = &MockLister{}
+
 type MockDeleterLister struct {
 	MockDeleter
 	MockLister
 }
+
+var _ pods.DeleterLister = &MockDeleterLister{}
 
 func TestPodDisruptor(t *testing.T) {
 	as := assert.New(t)
