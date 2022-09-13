@@ -57,7 +57,7 @@ type MockDeleterLister struct {
 
 var _ pods.DeleterLister = &MockDeleterLister{}
 
-func TestPodDisruptor(t *testing.T) {
+func TestPodDisruptorDeletesPodTakenFromList(t *testing.T) {
 	as := assert.New(t)
 
 	ctx, cfn := context.WithCancel(context.Background())

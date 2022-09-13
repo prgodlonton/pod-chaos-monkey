@@ -45,7 +45,7 @@ func TestDeletePassesCorrectNamespaceAndPodName(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	cl := pods.NewClient(cs, "namespace")
+	cl := pods.NewServiceLayerClient(cs, "namespace")
 	as.Nil(cl.Delete(ctx, "pod-name"))
 
 	as.True(wasCalled)
@@ -65,7 +65,7 @@ func TestDeleteReturnsError(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	cl := pods.NewClient(cs, "namespace")
+	cl := pods.NewServiceLayerClient(cs, "namespace")
 	as.ErrorIs(cl.Delete(ctx, "pod-name"), err)
 }
 
@@ -94,7 +94,7 @@ func TestListPassesCorrectNamespaceAndSelectors(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	cl := pods.NewClient(cs, "namespace")
+	cl := pods.NewServiceLayerClient(cs, "namespace")
 	_, _ = cl.List(ctx, "field1=value1,field2=value2")
 
 	as.True(wasCalled)
@@ -126,7 +126,7 @@ func TestListExtractsPodsNames(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	cl := pods.NewClient(cs, "namespace")
+	cl := pods.NewServiceLayerClient(cs, "namespace")
 	list, err := cl.List(ctx, "")
 
 	as.Contains(list, "pod1")
@@ -148,7 +148,7 @@ func TestListReturnsError(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	cl := pods.NewClient(cs, "namespace")
+	cl := pods.NewServiceLayerClient(cs, "namespace")
 	_, err := cl.List(ctx, "field1=value1")
 
 	as.ErrorIs(err, listErr)

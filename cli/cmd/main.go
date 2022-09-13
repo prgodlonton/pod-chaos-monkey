@@ -6,6 +6,7 @@ import (
 	"cp2/cli/internal/kubernetes/pods"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -21,14 +22,14 @@ var (
 
 func init() {
 	rootCommand = &cobra.Command{
-		Use:     "pod-chaos-monkey <namespace>",
+		Use:     "pod-chaos-monkey <namespace> [flags]",
 		Short:   "Runs the pod resiliency tests",
 		Example: "pod-chaos-monkey workloads --local --selector app=nginx,env=dev --interval 10s",
 		Args:    cobra.ExactArgs(1),
 		RunE:    command,
 	}
 	flags := rootCommand.Flags()
-	flags.Bool("local", false, "flags whether this program running locally")
+	flags.Bool("local", false, "flags whether this program is running locally")
 	flags.String("selector", "", "restricts the test scope to the pods matching the selector")
 	flags.Duration("interval", 10*time.Second, "specifies time interval between pod deletions")
 }
@@ -40,27 +41,13 @@ func main() {
 }
 
 func command(cmd *cobra.Command, args []string) error {
-	flags := cmd.Flags()
-	local, err := flags.GetBool("local")
+	runningLocally, podSelector, interval, err := extractFlags(cmd.Flags())
 	if err != nil {
 		return err
 	}
-	selector, err := flags.GetString("selector")
+	disruptor, err := newPodDisruptor(runningLocally, args[0], interval)
 	if err != nil {
 		return err
-	}
-	interval, err := flags.GetDuration("interval")
-	if err != nil {
-		return err
-	}
-
-	cs, err := newClientset(local)
-	if err != nil {
-		return err
-	}
-	disruptor, err := commands.NewPodDisruptor(pods.NewClient(cs, args[0]), interval)
-	if err != nil {
-		return fmt.Errorf("cannot create tester: %w", err)
 	}
 
 	signals := make(chan os.Signal, 1)
@@ -69,10 +56,10 @@ func command(cmd *cobra.Command, args []string) error {
 	ctx, cfn := context.WithCancel(context.Background())
 	defer cfn()
 
-	errs := make(chan error)
+	errs := make(chan error, 1)
 	go func() {
-		if err := disruptor.Disrupt(ctx, selector); err != nil {
-			errs <- fmt.Errorf("cannot start tester: %w", err)
+		if err := disruptor.Disrupt(ctx, podSelector); err != nil {
+			errs <- fmt.Errorf("cannot start pod disruptor: %w", err)
 		}
 		close(errs)
 	}()
@@ -80,17 +67,47 @@ func command(cmd *cobra.Command, args []string) error {
 	select {
 	case <-signals:
 		cfn()
+		return nil
 	case err := <-errs:
 		return err
 	}
-	return nil
 }
 
-func newClientset(local bool) (*kubernetes.Clientset, error) {
-	if local {
-		return newLocalClientset()
+func extractFlags(flags *pflag.FlagSet) (bool, string, time.Duration, error) {
+	local, err := flags.GetBool("local")
+	if err != nil {
+		return false, "", time.Duration(0), err
 	}
-	return newInClusterClientset()
+	selector, err := flags.GetString("selector")
+	if err != nil {
+		return false, "", time.Duration(0), err
+	}
+	interval, err := flags.GetDuration("interval")
+	if err != nil {
+		return false, "", time.Duration(0), err
+	}
+	return local, selector, interval, nil
+}
+
+func newPodDisruptor(runningLocally bool, namespace string, interval time.Duration) (*commands.PodDisruptor, error) {
+	var cs *kubernetes.Clientset
+	var err error
+	if runningLocally {
+		cs, err = newLocalClientset()
+	} else {
+		cs, err = newInClusterClientset()
+	}
+	if err != nil {
+		return nil, err
+	}
+	d, err := commands.NewPodDisruptor(
+		pods.NewServiceLayerClient(cs, namespace),
+		interval,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create pod disruptor: %w", err)
+	}
+	return d, nil
 }
 
 func newLocalClientset() (*kubernetes.Clientset, error) {

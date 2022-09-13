@@ -38,11 +38,11 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestListReturnsPodsMatchingSelectors(t *testing.T) {
+func TestListReturnsPodsMatchingSelector(t *testing.T) {
 	ctx, cfn := context.WithTimeout(context.Background(), timeoutDur)
 	defer cfn()
 
-	client := pods.NewClient(cs, namespace)
+	client := pods.NewServiceLayerClient(cs, namespace)
 	list, err := client.List(ctx, "app=nginx,env=dev")
 
 	as := assert.New(t)
@@ -55,7 +55,7 @@ func TestDeleteTerminatesVictimPod(t *testing.T) {
 	defer cfn()
 
 	selectors := "app=nginx,env=dev"
-	client := pods.NewClient(cs, namespace)
+	client := pods.NewServiceLayerClient(cs, namespace)
 	list, err := client.List(ctx, selectors)
 
 	as := assert.New(t)

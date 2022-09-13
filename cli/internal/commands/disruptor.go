@@ -30,13 +30,13 @@ func NewPodDisruptor(client pods.DeleterLister, period time.Duration) (*PodDisru
 }
 
 // Disrupt selects a victim pod from a list to be deleted at a regular interval
-func (c *PodDisruptor) Disrupt(ctx context.Context, selector string) error {
+func (c *PodDisruptor) Disrupt(ctx context.Context, podSelector string) error {
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(c.period):
-			list, err := c.client.List(ctx, selector)
+			list, err := c.client.List(ctx, podSelector)
 			if err != nil {
 				return err
 			}
