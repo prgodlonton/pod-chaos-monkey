@@ -1,22 +1,23 @@
 # Usage:
 # make                           # defaults to all
-# make all                       # compiles the CLI binary and runs integration and unit tests
-# make build                     # compiles the CLI binary
-# make build.local               # builds the Dockerfile and tags the image as pod-chaos-monkey:latest
-# make clean                     # remove the CLI binary and build artifacts
-# make server                    # compile the server binary
+# make all                       # Runs integration, unit tests, builds the Dockerfile and tags it as pod-chaos-monkey:latest
+# make build                     # runs the linter and builds the Dockerfile and tags the image as pod-chaos-monkey:latest
+# make build.local               # runs the linter and builds the binary locally
+# make clean                     # removes the binary
+# make start                     # starts the pod chaos monkey running in your Kubernetes cluster
 # make start.local               # starts the pod chaos monkey running locally
-# make test                      # runs unit tests for the CLI
-# make test.int                  # runs integration tests for the CLI
+# make test                      # runs unit tests
+# make test.int                  # runs integration tests
 
 .PHONY: all build clean start.local test test.int
 
-all: test.int build
+all: test.int test build
 
 clean:
 	@rm pod-chaos-monkey
 
 build:
+	@golangci-lint run ./...
 	@docker build . -t pod-chaos-monkey:latest
 
 build.local: $(shell find ./cli/ -type f)
