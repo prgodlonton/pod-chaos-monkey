@@ -65,7 +65,7 @@ labels `app=nginx,env-dev` every 2 seconds from the workloads namespace.
 
 ### In Cluster
 
-Run `kubectl apply -f ./manifests/run.yaml` to run the program within the cluster or with `make start`
+Run `kubectl apply -f ./manifests/run.yaml` to run the program within the cluster or with `make start`.
 It will be deployed to the workloads namespace and will select only those pods created via `./manifests/setup.yaml` as 
 candidates for deletion.
 The `./manifests/run.yaml` will also create the necessary cluster role and bind this cluster role onto the default 
@@ -73,7 +73,7 @@ service account for the workloads namespace.
 
 ## Tests
 
-Both unit and integration test have been provided and are run with `make test` and `make test.int` respectively. The 
-build tag `integration` discerns between these two types of test. 
+Both unit and integration test have been provided and are run with `make test` and `make test.int` respectively. 
+The build tag `integration` discerns between these two types of test. 
 The integration tests assume that the manifest at `manifests/setup.yaml` has been applied cluster. 
-This can be done via `kubectl apply -f ./manifests/setup.yaml`.
+This can be done via `kubectl apply -f ./manifests/setup.yaml` or `make setup`.
