@@ -77,3 +77,8 @@ Both unit and integration test have been provided and are run with `make test` a
 The build tag `integration` discerns between these two types of test. 
 The integration tests assume that the manifest at `manifests/setup.yaml` has been applied cluster. 
 This can be done via `kubectl apply -f ./manifests/setup.yaml` or `make setup`.
+
+## Improvements
+
+There is no logging in the program at the present due to time constraints; however, this should be added to get the 
+program production-ready.
